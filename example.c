@@ -1,62 +1,37 @@
-// STM32F407VE system clock set to 100 Mhz
+// STM32F407VE system clock set to 168 Mhz
 
-uint32_t i = 0;  // make this gloabal for Live Expression wiev in STM32CubeIDE
+#include "main.h"
+
+uint16_t interval_1 = 500;
+uint16_t timeElapsed_1 = 0;
+
+uint16_t interval_2 = 250;
+uint16_t timeElapsed_2 = 0;
 
 int main(void)
 {
-  __HAL_RCC_TIM5_CLK_ENABLE();
-  TIM5->PSC = HAL_RCC_GetPCLK1Freq() / 250000;
-  TIM5->CR1 = TIM_CR1_CEN;
-  TIM5->CNT = -10;
+	
 
-  while (1)
-  {
-      // elapsedMillis 1 starts ---------------------
-      uint32_t microSeconds = TIM5->CNT << 1;
-    
-      static uint32_t interval_1 = 1000000;
+  while (1){
+	  
+	uint16_t milliSeconds = HAL_GetTick();              //Get value from HAL_GetTick() per one loop cycle!
+	uint16_t getTime1 = milliSeconds - timeElapsed_1;   //Solution for overflow!
+	uint16_t getTime2 = milliSeconds - timeElapsed_2;   //Solution for overflow!
 
-      static uint32_t timeElapsed_1 = 0;
-
-      if(microSeconds - timeElapsed_1 > interval_1)
-      {
+        if(getTime1 > interval_1)
+        {
             HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_6);
 
-            timeElapsed_1 = microSeconds;
-      }
-      // elapsedMillis 1 ends -----------------------
+            timeElapsed_1 += interval_1;                    //Solution for elapsed time synchronisation!
+        }
+	  
+        if(getTime2 > interval_2)
+        {
+    	    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_7);
 
-
-      // elapsedMillis 2 starts ---------------------
-      static uint32_t interval_2 = 500000;
-
-      static uint32_t timeElapsed_2 = 0;
-
-      if(microSeconds - timeElapsed_2 > interval_2)
-      {
-
-           HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_7);
-
-           timeElapsed_2 = microSeconds;
-      }
-      // elapsedMillis 2 ends -----------------------
-      
-    
-      // elapsedMillis 3 starts ---------------------
-      static uint32_t interval_3 = 2000000;
-
-	    static uint32_t timeElapsed_3 = 0;
-    
-      //static uint32_t i = 0;
-
-	    if(microSeconds - timeElapsed_3 > interval_3)
-	    {
-
-            i++;
-
-            timeElapsed_3 = microSeconds;
-	    }
-      // elapsedMillis 3 ends -----------------------
-  }
+    	    timeElapsed_2 += interval_2;                    //Solution for elapsed time synchronisation!
+        }
+	  
+  }; //while ends
 
 }
